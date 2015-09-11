@@ -26,8 +26,15 @@
   <template>
     <!-- your DOM here -->
     <h1>Da's Web-audio simple synthesizer</h1>
-    <spiral-knob id="knobAmp" label="Amp" value="0.1"></spiral-knob>
-    <spiral-knob id="freqAmp" label="Freq" value="400" min-value="20" max-value ="880"></spiral-knob>
+    <spiral-knob id="knobAmp" label="Amp" value="0"></spiral-knob>
+    <spiral-knob id="knobFreq" label="Freq" value="400" min-value="20" max-value ="880"></spiral-knob>
+    <spiral-knob id="knobModFreq" label="Mod F" value="200" min-value="1" max-value = "400"></spiral-knob>
+    <spiral-knob id="knobModAmp" label="Mod A" value="100" min-value="1" max-value = "1000"></spiral-knob>
+    <spiral-knob id="knobMod2Freq" label="Mod2 F" value="200" min-value="1" max-value = "400"></spiral-knob>
+    <spiral-knob id="knobMod2Amp" label="Mod2 A" value="100" min-value="1" max-value = "1000"></spiral-knob>
+    <spiral-knob id="knobAMFreq" label="AM F" value="5" min-value="0" max-value = "1000"></spiral-knob>
+    <spiral-knob id="knobAMAmp" label="AM A" value="0.1" min-value="0" max-value = "1"></spiral-knob>
+
 
   </template>
 
@@ -50,17 +57,35 @@
       _buildAudioGraph: function () {
         this.context.createNodes(this, {
           'osc': 'Oscillator',
-          'amp': 'Gain'
+          'amp': 'Gain',
+          'mod': 'Oscillator',
+          'modAmp': 'Gain',
+          'mod2': 'Oscillator',
+          'mod2Amp': 'Gain',
+          'AM': 'Oscillator',
+          'AMAmp': 'Gain',
         });
 
+        this.AM.to(this.AMAmp).to(this.amp.gain);
+        this.mod2.to(this.mod2Amp).to(this.mod.frequency);
+        this.mod.to(this.modAmp).to(this.osc.frequency);
         this.osc.to(this.amp).to(this.context.DAC);
-        this.amp.value = 0.25;
+        this.amp.value = 0.1;
         this.osc.start();
+        this.mod.start();
+        this.mod2.start();
+        this.AM.start();
       },
 
       _bindUI: function () {
         this.$.knobAmp.bind(this.amp.gain);
-        this.$.freqAmp.bind(this.osc.frequency)
+        this.$.knobFreq.bind(this.osc.frequency);
+        this.$.knobModFreq.bind(this.mod.frequency);
+        this.$.knobModAmp.bind(this.modAmp.gain);
+        this.$.knobMod2Freq.bind(this.mod2.frequency);
+        this.$.knobMod2Amp.bind(this.mod2Amp.gain);
+        this.$.knobAMFreq.bind(this.AM.frequency);
+        this.$.knobAMAmp.bind(this.AMAmp.gain);
       },
 
       /* Polymer built-in event handlers */
